@@ -1,4 +1,4 @@
-from app.main import app
+from main import app
 
 app.config["PROFILE"] = True
 app.config["DEBUG"] = True
