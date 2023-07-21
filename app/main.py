@@ -1,7 +1,7 @@
 import random
 import time
 import requests
-import logging
+import logging as logging_pkg
 from collections import Counter
 
 from flask import Flask, url_for, render_template, request, flash, redirect
@@ -12,6 +12,9 @@ from cryptography.fernet import Fernet
 
 from possible_answers import possibleAnswers
 from possible_guesses import possibleGuesses
+
+logger = logging_pkg.getLogger(__name__)
+logging_pkg.basicConfig(filename=None, level=logging_pkg.INFO)
 
 app = Flask(__name__)
 
@@ -36,11 +39,9 @@ def wordle():
     if form.secret.data is None:
         form.secret.data = "gizmo"
     if form.validate_on_submit():
+        logger.info(f'processing guess {form.guess.data}, history length is {len(form.history)}')
         check = check_guess(form.secret.data, form.guess.data)
         form.history.append_entry({'guess': form.guess.data, "check": check_to_string(check, form.guess.data)})
-        logging.critical(form.history)
-#    else:
-#        form.data['secret'] = "gizmo"
     return render_template("wordle.html", page_title="Wordle by Ryan", form=form)
 
 def check_guess(answer, guess):
