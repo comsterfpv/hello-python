@@ -1,76 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{% block title %} {% endblock %}Wordle</title>
-    <style>
-        nav div {
-            color: #416bd6;
-            font-size: 3em;
-            text-decoration: none;
-            text-align: center;
-        }
 
-        .alert {
-            padding: 20px;
-            color: #970020;
-            background-color: #ffd5de;
-            text-align: center;
-        }
+{% block styles %}
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+{% endblock %}
 
-        .green {
-            padding: 0px;
-            margin: 0px;
-            color: #00c507;
-            background-color: lightgrey;
-            width: 15px;
-            text-transform: capitalize;
-            text-align: center;
-            position: fixed;
-            left: 50%;
-            transform: translate(-50%, 0px);
-        }
+{% block title %}
+  {% if page_title %}
+  {{page_title}}
+  {% else %}
+  Hello, World
+  {% endif %}
+{% endblock %}
 
-        .yellow {
-            padding: 0px;
-            margin: 0px;
-            color: #ece804;
-            background-color: lightgrey;
-            text-transform: capitalize;
-            width: 15px;
-            text-align: center;
-            position: fixed;
-            left: 50%;
-            transform: translate(-150%, 0px);
-        }
-
-        .white {
-            padding: 0px;
-            margin: 0px;
-            color: #ffffff;
-            background-color: lightgrey;
-            text-transform: capitalize;
-            width: 15px;
-            text-align: center;
-            position: fixed;
-            left: 50%;
-            transform: translate(+50%, 0px);
-        }
-
-    </style>
-</head>
-<body>
-    <nav>
-        <div>WORDLE</div>
-    </nav>
-    <hr>
-    <div class="content">
-        {% with messages = get_flashed_messages(with_categories = true) %}
-            {% for category, message in messages %}
-            <div class="{{ category }}">{{ message }}</div>
-            {% endfor %}
-        {% endwith %}
-        {% block content %} {% endblock %}
-    </div>
-</body>
-</html>
+{% block body %}
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul class=flashes>
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+<div class=page>
+  {% block content %}{% endblock %}
+</div>
+{% endblock %}

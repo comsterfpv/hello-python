@@ -1,8 +1,13 @@
 import random
 import time
 import requests
+import logging
+from collections import Counter
 
 from flask import Flask, url_for, render_template, request, flash, redirect
+from flask_wtf import FlaskForm
+from wtforms.validators import DataRequired
+from wtforms import StringField, FloatField, FormField, FieldList, HiddenField
 from cryptography.fernet import Fernet
 
 from possible_answers import possibleAnswers
@@ -10,37 +15,49 @@ from possible_guesses import possibleGuesses
 
 app = Flask(__name__)
 
+app.config["SECRET_KEY"] = "wordle-rules"
+
 css_head = "<head><link rel='stylesheet' href='/style.css'></head>"
 key = Fernet.generate_key()
 f = Fernet(key)
 
+class GuessAndCheck(FlaskForm):
+    guess = StringField("guess")
+    check = StringField("check")
+
+class WordleForm(FlaskForm):
+    secret = HiddenField("secret")
+    guess = StringField("guess", validators=[DataRequired()])
+    history = FieldList(FormField(GuessAndCheck), min_entries=0)
+
 @app.route('/wordle', methods=('GET', 'POST'))
-def looping():
-    return render_template('create.html')
-    turns = 0
-    word = possibleAnswers[random.randint(0, len(possibleAnswers)-1)]
+def wordle():
+    form = WordleForm(request.form)
+    if form.secret.data is None:
+        form.secret.data = "gizmo"
+    if form.validate_on_submit():
+        check = check_guess(form.secret.data, form.guess.data)
+        form.history.append_entry({'guess': form.guess.data, "check": check_to_string(check, form.guess.data)})
+        logging.critical(form.history)
+#    else:
+#        form.data['secret'] = "gizmo"
+    return render_template("wordle.html", page_title="Wordle by Ryan", form=form)
 
-    turns_encrypted = f.encrypt(bytes(str(turns).encode()))
-    word_encrypted = f.encrypt(bytes(word))
-    
-    word_payload = {'word': word_encrypted}
-    requests.post('http://localhost:5000/wordle', data=word_payload)
+def check_guess(answer, guess):
+    freq = Counter([a for a, g in zip(answer, guess) if a != g])
+    ret = []
+    for a, g in zip(answer, guess):
+        if a == g:
+            ret.append(2)
+        elif g in freq and freq[g] > 0:
+            freq[g] -= 1
+            ret.append(1)
+        else:
+            ret.append(0)
+    return ret
 
-    word = f.decrypt(requests.get('http://localhost:5000/wordle', data=word_payload)).decode
-    turns = int(f.decrypt(requests.get('http://localhost:5000/wordle', data=word_payload)).decode)
-
-    if turns < 6:
-        correct, guessable = validate(word,turns)
-        if not guessable:
-            return render_template('create.html')
-        elif correct:
-            return render_template('create.html')
-        return render_template('create.html')
-        
-    turns_payload = {'turns': turns_encrypted}
-    requests.post('http://localhost:5000/wordle', data=turns_payload)
-
-    turns+=1
+def check_to_string(check, guess):
+    return ''.join([{0: ".", 1: "-"}.get(j, g) for j, g in zip(check, guess)])
 
 def check(guess,word):
     temp = word

@@ -1,0 +1,53 @@
+        nav div {
+            color: #416bd6;
+            font-size: 3em;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .alert {
+            padding: 20px;
+            color: #970020;
+            background-color: #ffd5de;
+            text-align: center;
+        }
+
+        .green {
+            padding: 0px;
+            margin: 0px;
+            color: #00c507;
+            background-color: lightgrey;
+            width: 15px;
+            text-transform: capitalize;
+            text-align: center;
+            position: fixed;
+            left: 50%;
+            transform: translate(-50%, 0px);
+        }
+
+        .yellow {
+            padding: 0px;
+            margin: 0px;
+            color: #ece804;
+            background-color: lightgrey;
+            text-transform: capitalize;
+            width: 15px;
+            text-align: center;
+            position: fixed;
+            left: 50%;
+            transform: translate(-150%, 0px);
+        }
+
+        .white {
+            padding: 0px;
+            margin: 0px;
+            color: #ffffff;
+            background-color: lightgrey;
+            text-transform: capitalize;
+            width: 15px;
+            text-align: center;
+            position: fixed;
+            left: 50%;
+            transform: translate(+50%, 0px);
+        }
+
